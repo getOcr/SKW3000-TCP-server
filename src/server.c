@@ -45,8 +45,8 @@ int edit(char *lan)
 			break;
 		}
 	}
-	printf("linebuffer=%s\n",linebuffer);
-	printf("k=%d\n",k);
+	/*printf("linebuffer=%s\n",linebuffer);
+	printf("k=%d\n",k);*/
 
 	/*write buffer*/
 	memset(save[k+2], 0, 512);	
@@ -150,9 +150,35 @@ int main (int argc,char **argv)
 				{
 		            		buff[n] = '\0';
 		            		printf("recv msg from client: %s\n", buff);
-		            		if(edit(buff)!=-1){
-		            			printf("'/etc/config/network' has been changed, %s is wan\n", buff);
+					
+					if((strcmp(buff,"lan1") && strcmp(buff,"lan2") && strcmp(buff,"lan3") && strcmp(buff,"lan4"))==1){
+						printf("invalid msg! Command needs to be chose among lan1/lan2/lan3/lan4, pls send again\n");						
+						continue;
 					}
+
+		            		if(edit(buff)!=-1)   /*perform edit()*/
+					{
+		            			printf("'/etc/config/network' has been changed, %s is wan\n", buff);
+						/*network restart according to the command from client*/
+						printf("Do u want to restart the network to validate your edit?(u can send msg again when restart is done)[y/n]:\n");
+						int restart_msg_len;
+						if ((restart_msg_len = recv(sockfd, buff, MAXLINE, 0)) > 0) {
+                            				buff[restart_msg_len] = '\0';
+                            				if (buff[0] == 'y') {
+                                				if (system("/etc/init.d/network restart") != -1) {
+                                   					printf("network restarted\n");  /*I dont know how to indicate the restarting process is done, because there are many stuff in SecureCRT after run /etc/init.d/network restart*/
+                                				} else {
+                                    					printf("restart failed\n");
+                                				}
+                            				} else {
+                                				printf("only changed the network file without restarting\n");
+								printf("Now u can send lan1/lan2/lan3/lan4 again\n");
+                            		      		}
+                        			} else {
+                            				printf("recv error: %s errno: %d\n", strerror(errno), errno);
+                        			}
+                    			}
+
 		        	} else if (n == 0) {
 		            		printf("Client disconnected\n");
 		            		close(sockfd);
