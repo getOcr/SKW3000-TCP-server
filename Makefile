@@ -2,8 +2,8 @@ include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/kernel.mk
  
 PKG_NAME:=server
-PKG_VERSION=1
-PKG_RELEASE:=1.0
+PKG_VERSION=2
+PKG_RELEASE:=2.0
  
 PKG_BUILD_DIR := $(KERNEL_BUILD_DIR)/$(PKG_NAME)
  

@@ -25,7 +25,7 @@ int edit(char *lan)
 	/*FILE *fp = fopen("/home/skylab/Mywork/openwrt/network", "r+");*/
 	if(fp == NULL)
 	{
-		printf("open error\n");
+		printf("file open error\n");
 		return -1;
 	}
 	
@@ -149,30 +149,42 @@ int main (int argc,char **argv)
 		        	if ((n = recv(sockfd, buff, MAXLINE, 0)) > 0) /*recv() will return the len of info*/
 				{
 		            		buff[n] = '\0';
-		            		printf("recv msg from client: %s\n", buff);
+		            		/*printf("recv msg from client: %s\n", buff);*/
+					send(sockfd, "recv msg from client: ", strlen("recv msg from client: "), 0);
+					send(sockfd, buff, strlen(buff), 0);
+					send(sockfd, "\n", 1, 0);
 					
 					if((strcmp(buff,"lan1") && strcmp(buff,"lan2") && strcmp(buff,"lan3") && strcmp(buff,"lan4"))==1){
-						printf("invalid msg! Command needs to be chose among lan1/lan2/lan3/lan4, pls send again\n");						
+						/*printf("invalid msg! Command needs to be chose among lan1/lan2/lan3/lan4, pls send again\n");	*/
+						send(sockfd, "invalid msg! Command needs to be chose among lan1/lan2/lan3/lan4, pls send again\n", strlen("invalid msg! Command needs to be chose among lan1/lan2/lan3/lan4, pls send again\n"), 0);				
 						continue;
 					}
 
 		            		if(edit(buff)!=-1)   /*perform edit()*/
 					{
-		            			printf("'/etc/config/network' has been changed, %s is wan\n", buff);
+		            			/*printf("'/etc/config/network' has been changed, %s is wan\n", buff);*/
+						send(sockfd, "'/etc/config/network' has been changed, ", strlen("'/etc/config/network' has been changed, "), 0);
+						send(sockfd, buff, strlen(buff), 0);
+						send(sockfd, " is wan\n", strlen(" is wan\n"), 0);
+
 						/*network restart according to the command from client*/
-						printf("Do u want to restart the network to validate your edit?(u can send msg again when restart is done)[y/n]:\n");
+						/*printf("Do u want to restart the network to validate your edit?(u can send msg again when restart is done)[y/n]:\n");*/
+						send(sockfd, "Do u want to restart the network to validate your edit?(u can send msg again when restart is done)[y/n]:\n", strlen("Do u want to restart the network to validate your edit?(u can send msg again when restart is done)[y/n]:\n"), 0);
 						int restart_msg_len;
 						if ((restart_msg_len = recv(sockfd, buff, MAXLINE, 0)) > 0) {
                             				buff[restart_msg_len] = '\0';
                             				if (buff[0] == 'y') {
                                 				if (system("/etc/init.d/network restart") != -1) {
-                                   					printf("network restarted\n");  /*I dont know how to indicate the restarting process is done, because there are many stuff in SecureCRT after run /etc/init.d/network restart*/
+                                   					/*printf("network restarted\n");  /*I dont know how to indicate the restarting process is done, because there are many stuff in SecureCRT after run /etc/init.d/network restart*/
+									send(sockfd, "network restarted\n", strlen("network restarted\n"), 0);
                                 				} else {
-                                    					printf("restart failed\n");
+                                    					/*printf("restart failed\n");*/
+									send(sockfd, "restart failed\n", strlen("restart failed\n"), 0);
                                 				}
                             				} else {
-                                				printf("only changed the network file without restarting\n");
-								printf("Now u can send lan1/lan2/lan3/lan4 again\n");
+                                				/*printf("only changed the network file without restarting\n");
+								printf("Now u can send lan1/lan2/lan3/lan4 again\n");*/
+								send(sockfd, "only changed the network file without restarting\nNow u can send lan1/lan2/lan3/lan4 again\n", strlen("only changed the network file without restarting\nNow u can send lan1/lan2/lan3/lan4 again\n"), 0);
                             		      		}
                         			} else {
                             				printf("recv error: %s errno: %d\n", strerror(errno), errno);
